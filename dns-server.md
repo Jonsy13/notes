@@ -5,25 +5,25 @@
   for e.g. for reaching an IP `192.178.2.0` as `DB` from our machine, we can add this as entry in /etc/hosts file.
 
   ```
-  `192.178.2.0 DB`
+  192.178.2.0 DB
   ```
 
 - If we go with the above approach, the for reaching DB from many other machines, we will have to add the same entry in all the machines. Instead of doing this,
   we can make one server as Domain resolution server & add all IPs with names there. Then we can specify that server as nameserver in `/etc/resolv.conf` file in our hosts.
 
-  In NameServer, /etc/hosts/
+  In NameServer, `/etc/hosts/`
 
   ```
   192.178.2.0 DB
   ```
 
-  In Host Machine, /etc/resolv.conf
+  In Host Machine, `/etc/resolv.conf`
 
   ```
   nameserver 192.178.2.8` => Here, 192.178.2.8 is IP of our nameserver
   ```
 
-  Now, when we will try to access DB by name, it will look into /etc/resolv.conf file & then will try to resolve it from nameserver.
+  Now, when we will try to access DB by name, it will look into `/etc/resolv.conf` file & then will try to resolve it from nameserver.
 
 **Notes:**
 
@@ -87,7 +87,7 @@ name to name - CNAME
 - Next we need to add all IP to name pairs in `/etc/hosts` file on that host.
 - Then, we have to tell DNS server to use the `/etc/hosts` file for fetching IP/Name combinations.
   By default, coreDNS server uses a `corefile` for this.
-  We can edit the corefile & add this -
+  We can edit the `corefile` & add this -
   ```
   {
     hosts /etc/hosts
