@@ -78,6 +78,26 @@ spec:
             storage: 500Mi
 ```
 
+**We can use above pvc in a pod like below**
+
+```YAML
+apiVersion: v1
+kind: Pod
+metadata:
+    name: my-pod
+spec:
+    containers:
+    - name: my-container
+      image: images-name
+      volumeMounts:
+        - name: my-volume
+          mountPath: /opt
+    volume:
+        - name: my-volume
+          persistentVolumeClaim:
+            claimName: my-pvc
+```
+
 > **Note:**
 >
 > When a pvc is deleted,

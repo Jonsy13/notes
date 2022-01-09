@@ -1,0 +1,197 @@
+name: EKS-Pipeline
+on:
+  workflow_dispatch:
+
+jobs:
+  CLUSTER-1-SETUP:
+    runs-on: ubuntu-latest
+    env:
+      CI_PIPELINE_ID: ${{ github.run_id }}
+      region: "eu-west-2"
+      AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
+      AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+      nodes: 3
+      node_type: "t2.medium"
+      CLUSTER_NUM: 1
+    container:
+      image: jonsy13/kubera-litmus:latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Settings up EKS Cluster
+        run: |
+          chmod 755 k8s/eks/1-cluster-setup/setup
+          k8s/eks/1-cluster-setup/setup
+      - name: Uploading kube-config as an artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: kube-config-1
+          path: ".kube/"
+
+  # CLUSTER-2-SETUP:
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     CI_PIPELINE_ID: ${{ github.run_id }}
+  #     region: "eu-west-2"
+  #     AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
+  #     AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+  #     nodes: 2
+  #     node_type: "t2.micro"
+  #     CLUSTER_NUM: 2
+  #   container:
+  #     image: jonsy13/kubera-litmus:latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         fetch-depth: 0
+  #     - name: Settings up EKS Cluster
+  #       run: |
+  #         chmod 755 k8s/eks/1-cluster-setup/setup
+  #         k8s/eks/1-cluster-setup/setup
+
+  PORTAL-SETUP:
+    needs: CLUSTER-1-SETUP
+    runs-on: ubuntu-latest
+    outputs:
+      URL: ${{ steps.portal-setup.outputs.URL }}
+    env:
+      AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
+      AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+    container:
+      image: jonsy13/kubera-litmus:latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Downloading artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: kube-config-1
+          path: ".kube"
+      - name: Setting Up Litmus-Portal on Cluster-1
+        id: portal-setup
+        run: |
+          chmod 755 ./litmus/setup.sh
+          ./litmus/setup.sh
+          echo "::set-output name=URL::$(kubectl get svc litmusportal-frontend-service -n litmus --template="{{range .status.loadBalancer.ingress}}{{.hostname}}{{end}}")"
+
+  Tests-Finder: # Job that list subdirectories
+    runs-on: ubuntu-latest
+    outputs:
+      dir: ${{ steps.set-dirs.outputs.dir }} # generate output name dir by using inner step output
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: "portal"
+          fetch-depth: 0
+      - id: set-dirs # Give it an id to handle to get step outputs in the outputs key above
+        run: cd Cypress/cypress/integration/Parallel_Tests/ && echo "::set-output name=dir::$(ls -d */ | jq -R -s -c 'split("\n")[:-1]')"
+        # Define step output named dir base on ls command transformed to JSON thanks to jq
+
+  Basic-Tests:
+    if: always()
+    runs-on: ubuntu-latest
+    needs: [PORTAL-SETUP] # Depends on previous job
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: "portal"
+          fetch-depth: 0
+      - name: Running basic tests (Login and Onboarding Tests)
+        uses: cypress-io/github-action@v2
+        continue-on-error: false
+        with:
+          spec: cypress/integration/Basic_Setup/**/*.spec.js
+          working-directory: Cypress/
+          config-file: cypress.prod.json
+        env:
+          CYPRESS_BASE_URL: http://${{needs.PORTAL-SETUP.outputs.URL}}:9091
+
+  Parallel-Tests:
+    if: always()
+    runs-on: ubuntu-latest
+    needs: [Tests-Finder, Basic-Tests, PORTAL-SETUP] # Depends on previous job
+    strategy:
+      matrix:
+        dir: ${{fromJson(needs.Tests-Finder.outputs.dir)}} # List matrix strategy from directories dynamically
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: "portal"
+          fetch-depth: 0
+      - name: Running Parallel tests
+        uses: cypress-io/github-action@v2
+        continue-on-error: false
+        with:
+          spec: cypress/integration/Parallel_Tests/${{matrix.dir}}*.spec.js
+          working-directory: Cypress/
+          config-file: cypress.prod.json
+        env:
+          CYPRESS_BASE_URL: http://${{needs.PORTAL-SETUP.outputs.URL}}:9091
+
+  PORTAL-CLEANUP:
+    if: always()
+    needs: [Parallel-Tests]
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
+      AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+    container:
+      image: jonsy13/kubera-litmus:latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Downloading artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: kube-config-1
+          path: ".kube"
+      - name: Litmus-Portal Cleanup
+        run: |
+          chmod 755 ./litmus/cleanup.sh
+          ./litmus/cleanup.sh
+
+  CLUSTER-1-CLEANUP:
+    if: always()
+    runs-on: ubuntu-latest
+    needs: [PORTAL-CLEANUP]
+    env:
+      CI_PIPELINE_ID: ${{ github.run_id }}
+      region: "eu-west-2"
+      AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
+      AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+      CLUSTER_NUM: 1
+    container:
+      image: jonsy13/kubera-litmus:latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Tearing down EKS Cluster
+        run: |
+          chmod 755 k8s/eks/2-cluster-cleanup/cleanup
+          k8s/eks/2-cluster-cleanup/cleanup
+
+  # CLUSTER-2-CLEANUP:
+  #   if: always()
+  #   runs-on: ubuntu-latest
+  #   needs: CLUSTER-2-SETUP
+  #   env:
+  #     CI_PIPELINE_ID: ${{ github.run_id }}
+  #     region: "eu-west-2"
+  #     AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
+  #     AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+  #     CLUSTER_NUM: 2
+  #   container:
+  #     image: jonsy13/kubera-litmus:latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         fetch-depth: 0
+  #     - name: Tearing down EKS Cluster
+  #       run: |
+  #         chmod 755 k8s/eks/2-cluster-cleanup/cleanup
+  #         k8s/eks/2-cluster-cleanup/cleanup
