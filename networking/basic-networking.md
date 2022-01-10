@@ -27,7 +27,7 @@ Machine-1 --- Network-1 ---- Router ----- Network-2 ---- Machine-2
 
 **Some basic commands -**
 
-- To check network interfaces on a host machine - `ip link`
+- To check network interfaces on a host machine - `ip link` or `ifconfig`
 - To check IPs assigned to a machine - `ip addr`
 - To assign an IP to machine - `ip addr add`
 - To add a GateWay to a machine for reaching to a machine in a different network connected to same router - `ip addr add <IP> via <GateWay>`
