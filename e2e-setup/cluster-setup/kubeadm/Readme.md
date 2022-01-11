@@ -128,7 +128,11 @@ bash <(curl -s  https://raw.githubusercontent.com/jonsy13/notes/master/e2e-setup
 
 - **kubeadm cluster setup**
 
-  For creating cluster using kubeadm, we have to be a root user, we can become root user as - `su -`
+  For creating cluster using kubeadm, we have to be a root user, we can become root user as -
+
+  ```BASH
+  sudo -i
+  ```
 
   ```BASH
   kubeadm init
@@ -207,4 +211,4 @@ bash <(curl -s  https://raw.githubusercontent.com/jonsy13/notes/master/e2e-setup
     kubeadm join --token <token> <control-plane-host>:<control-plane-port> --discovery-token-ca-cert-hash sha256:<hash>
     ```
 
-**NOTE :** If the instance you're using for kubeadm cluster is an EC2 instance then don't forget to open up the port 6443 in the instance security group.
+**NOTE :** If the instance you're using for kubeadm cluster is an EC2 instance then don't forget to open up the port 6443 in the master instance security group.
