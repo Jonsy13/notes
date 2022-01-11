@@ -195,6 +195,13 @@ bash <(curl -s  https://raw.githubusercontent.com/jonsy13/notes/master/e2e-setup
   kubectl taint nodes --all node-role.kubernetes.io/master-
   ```
 
+- **Deploy StorageClass :**
+
+  ```BASH
+  kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
+  kubectl patch storageclass local-path -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+  ```
+
 - **Joining your nodes :**
 
   The nodes are where your workloads (containers and Pods, etc) run. To add new nodes to your cluster do the following for each machine:
