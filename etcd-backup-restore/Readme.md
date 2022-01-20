@@ -12,6 +12,12 @@ We can do backup of an ETCD DB using etcdctl command line utility -
     - --cert: Mandatory Flag (Absolute Path to the Server certificate file)
     - --key:Mandatory Flag (Absolute Path to the Key file)
 
+    To check, if backup was successful, 
+
+    ```BASH
+    ETCDCTL_API=3 etcdctl snapshot status snapshot.db
+    ```
+
 For restoring the ETCD DB,
 
 - First, we need to stop kubea-api-server service

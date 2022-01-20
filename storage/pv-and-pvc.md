@@ -108,3 +108,34 @@ spec:
 > - It it is set to `Recycle`, then the data inside PV will be scrubed before making it available.
 
 **Note: The pvc can't be deleted until the pod using the same is deleted.**
+
+
+# Important Notes - 
+
+- **Pods using Volume with emptyDir type**
+
+    This volume will stay as long as life of pods.
+
+    **Some uses for an emptyDir are:**
+
+    - scratch space, such as for a disk-based merge sort
+    - checkpointing a long computation for recovery from crashes
+    - holding files that a content-manager container fetches while a webserver container serves the data
+
+
+    ```YAML
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: pod-with-emptydir
+    spec:
+      containers:
+      - name: my-container
+        image: container-image
+        volumeMounts:
+          - name: my-vol
+            mountPath: /data/opt
+      volumes:
+        - name: my-vol
+          emptyDir: {}
+    ```
