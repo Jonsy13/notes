@@ -24,10 +24,10 @@ There are many ways of providing env variables to resources.
       spec:
         containers:
         - image: my-sleeping-command
-            name: sleeper
-            envFrom:
-            - configMapRef:
-                name: CONFIG_MAP_NAME
+          name: sleeper
+          envFrom:
+          - configMapRef:
+              name: CONFIG_MAP_NAME
       ```
 
     - Using Secrets:
@@ -36,10 +36,10 @@ There are many ways of providing env variables to resources.
       spec:
         containers:
         - image: my-sleeping-command
-            name: sleeper
-            envFrom:
-            - secretRef:
-                name: SECRET_NAME
+          name: sleeper
+          envFrom:
+          - secretRef:
+              name: SECRET_NAME
       ```
 
     **Note: This way all data from cm & secrets will be added to container**
@@ -53,8 +53,8 @@ There are many ways of providing env variables to resources.
         - name: APP
           valueFrom:
             configMapKeyRef:
-              - name: app-configMap
-                key: APP --> Optional if same name as ENV
+              name: app-configMap
+              key: APP --> Optional if same name as ENV
       ```
 
     - Using Secrets:
@@ -63,8 +63,8 @@ There are many ways of providing env variables to resources.
         env:
         - name: APP
             valueFrom:
-            SecretKeyRef:
-                - name: app-secret
+              SecretKeyRef:
+                name: app-secret
                 key: APP --> Optional if same name as ENV
       ```
 
