@@ -16,10 +16,10 @@ For adding a Node affinity in Pods -
                     nodeSelectorTerms:
                     - matchExpressions:
                         - key: <KEY>
-                        operator: <OPERATOR>
-                        values:
-                        - <value-1>
-                        - <value-2>
+                          operator: <OPERATOR>
+                          values:
+                          - <value-1>
+                          - <value-2>
     ```
 
 - preferredDuringSchedulingIgnoredDuringExecution

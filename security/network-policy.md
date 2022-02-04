@@ -27,7 +27,7 @@ The Network policy is created to restrict network access rules on pods.
                             role: api-pod
                     ports:
                         - protocol: TCP
-                        port: 33032 
+                          port: 33032 
         ```
 
         But, above policy will allow all pod with label `role: api-pod` to acess DB pod.
@@ -55,7 +55,7 @@ The Network policy is created to restrict network access rules on pods.
                             name: prod 
                     ports:
                         - protocol: TCP
-                        port: 33032 
+                          port: 33032 
         ```
 
     - What if we want allow traffic from an IP.
@@ -77,7 +77,7 @@ The Network policy is created to restrict network access rules on pods.
                         cidr: 192.16.22.1/24 
                     ports:
                         - protocol: TCP
-                        port: 33032 
+                          port: 33032 
         ```
 
     **Note: The array of rules in `spec.ingress.from` is a OR operations between all rules in array.**
