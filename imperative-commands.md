@@ -101,7 +101,15 @@
 
 - Creating a CM -
 
+    ```BASH
+    kubectl create cm <configmap_name> --from-literal="" --from-file=""
+    ```
+
 - Creating a secret -
+
+    ```BASH
+    kubectl create secret generic <secret_name> --from-literal="" --from-file=""
+    ```
 
 - Creating a service -
 

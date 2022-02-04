@@ -39,4 +39,25 @@ spec:
   spec:
     schedulerName: <scheduler_name>
   ```
+
+# For checking default gateway - 
+
+    ```BASH
+    ip route show default
+    ```
+
+# Learn about netstat
+
+
+
 # Learn about CertificatesSinging ----- 
+
+
+Mock Exam - 2 
+
+# Create a new user called john. Grant him access to the cluster. John should have permission to create, list, get, update and delete pods in the development namespace . The private key exists in the location: /root/CKA/john.key and csr at /root/CKA/john.csr.
+
+# Create a nginx pod called nginx-resolver using image nginx, expose it internally with a service called nginx-resolver-service. Test that you are able to look up the service and pod names from within the cluster. Use the image: busybox:1.28 for dns lookup. Record results in /root/CKA/nginx.svc and /root/CKA/nginx.pod
+
+Mock Exam - 3
+
