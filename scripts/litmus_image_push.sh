@@ -9,15 +9,15 @@ declare -ga portal_images=("cle-frontend" "cle-server" "cle-event-tracker"
                        "cle-auth-server" "cle-subscriber" "cle-license-module")
 declare -ga backend_images=("chaos-operator" "chaos-runner" "chaos-exporter" "go-runner")
 
-declare -ga workflow_images=("k8s:latest" "litmus-checker:latest" "workflow-controller:v2.11.0" "argoexec:v2.11.0" "mongo:4.2.8" "curl:latest")
+declare -ga workflow_images=("k8s:2.6.0" "litmus-checker:2.6.0" "workflow-controller:v3.2.3" "argoexec:v3.2.3" "mongo:4.2.8" "curl:2.6.0")
 
 
 if [[ -z "${LITMUS_BACKEND_TAG}" ]];then
-  LITMUS_BACKEND_TAG="2.2.0"
+  LITMUS_BACKEND_TAG="2.6.0"
 fi
 
 if [[ -z "${LITMUS_PORTAL_TAG}" ]];then
-  LITMUS_PORTAL_TAG="2.3.0"
+  LITMUS_PORTAL_TAG="2.7.0"
 fi
 
 if [[ -z "${LITMUS_IMAGE_REGISTRY}" ]];then
@@ -26,6 +26,7 @@ fi
 
 if [[ -z "${TARGET_IMAGE_REGISTRY}" ]];then
   TARGET_IMAGE_REGISTRY="docker.io"
+  TARGET_REPONAME="dd"
 fi
 
 }
