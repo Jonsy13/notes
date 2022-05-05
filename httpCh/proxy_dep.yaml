@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: proxy-helper
+  namespace: agent
+  labels:
+    component: proxy-helper
+spec:
+  automountServiceAccountToken: false
+  nodeName: gke-vedant-test-cluster-default-pool-4aa79474-7ccm
+  hostNetwork: true
+  hostPID: true
+  restartPolicy: Never
+  containers:
+    - name: proxy-container
+      image: jonsy13/toxi:v1
+      imagePullPolicy: Always
+      securityContext:
+        runAsUser: 0
+        capabilities:
+          add:
+          - SYS_PTRACE
+          - NET_ADMIN
+          - MKNOD
+          - SYS_CHROOT
+          - SYS_ADMIN
+      env:
+      - name: TOTAL_CHAOS_DURATION
+        value: "30"
+      - name: TARGET_PORT
+        value: "8080"
+      - name: PID
+        value: "1199286"
+      - name: TOXIC_TYPE
+        value: "toggle"
+      - name: TOXIC_LATENCY
+        value: "10000"
+      - name: RESET_PEER_TIMEOUT
+        value: ""

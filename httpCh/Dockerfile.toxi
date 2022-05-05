@@ -1,0 +1,18 @@
+FROM alpine:3.15
+
+RUN apk update && \
+    apk add sudo curl iptables && \
+    wget https://github.com/Shopify/toxiproxy/releases/download/v2.4.0/toxiproxy-cli-linux-amd64 && \
+    chmod +x /toxiproxy-cli-linux-amd64 && \
+    wget https://github.com/Shopify/toxiproxy/releases/download/v2.4.0/toxiproxy-server-linux-amd64 && \
+    chmod +x /toxiproxy-server-linux-amd64
+
+RUN mv toxiproxy-server-linux-* /toxiproxy
+RUN mv toxiproxy-cli-linux-* /toxiproxy-cli
+
+COPY ./entrypoint.sh /
+
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+
