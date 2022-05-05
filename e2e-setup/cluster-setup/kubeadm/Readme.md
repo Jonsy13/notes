@@ -5,9 +5,9 @@
 Following script can be used to setup Container Runtime:
 
 ```BASH
-wget https://raw.githubusercontent.com/jonsy13/notes/master/e2e-setup/cluster-setup/kubeadm/setup-runtime.sh
-chmod +x setup-runtime.sh
-./setup-runtime.sh
+wget https://raw.githubusercontent.com/jonsy13/notes/master/e2e-setup/cluster-setup/kubeadm/runtime-setup.sh
+chmod +x runtime-setup.sh
+./runtime-setup.sh
 ```
 
 OR
