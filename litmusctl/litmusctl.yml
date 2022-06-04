@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: litmusctl
+  name: litmusctl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: litmusctl
+  template:
+    metadata:
+      labels:
+        app: litmusctl
+    spec:
+      containers:
+      - image: jonsy13/litmusctl:latest
+        imagePullPolicy: IfNotPresent
+        name: litmusctl
+        command: [ bash , -c]
+        args: [ "while true; do sleep 30; done;" ]
