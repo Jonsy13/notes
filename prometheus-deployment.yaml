@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-deployment
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+      name: prometheus
+    spec:
+      containers:
+        - args:
+            - --storage.tsdb.retention.time=360h
+            - --config.file=/etc/prometheus/prometheus.yml
+            - "--storage.tsdb.path=/prometheus/"
+          image: prom/prometheus:v2.25.2
+          imagePullPolicy: IfNotPresent
+          name: prometheus
+          ports:
+            - containerPort: 9090
+              name: web
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /etc/prometheus
+              name: config-volume
+            - mountPath: /etc/prometheus-rules
+              name: alertrules-volume
+            - name: prometheus-storage-volume
+              mountPath: /prometheus/
+        - name: sidecar
+          image: gcr.io/stackdriver-prometheus/stackdriver-prometheus-sidecar:${SIDECAR_IMAGE_TAG}
+          imagePullPolicy: Always
+          args:
+            - --stackdriver.project-id=${GCP_PROJECT}
+            - --prometheus.wal-directory=${DATA_DIR}/wal
+            - --stackdriver.kubernetes.location=${GCP_LOCATION}
+            - --stackdriver.kubernetes.cluster-name=${KUBE_CLUSTER}
+            #- --stackdriver.generic.location=${GCP_LOCATION}
+            #- --stackdriver.generic.namespace=${KUBE_CLUSTER}
+          ports:
+            - name: sidecar
+              containerPort: 9091
+          volumeMounts:
+            - name: prometheus-storage-volume
+              mountPath: /prometheus
+            - name: prometheus-key
+              mountPath: /var/secrets/google
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /var/secrets/google/prometheus-service-account.json
+      serviceAccount: prometheus
+      serviceAccountName: prometheus
+      volumes:
+        - configMap:
+            defaultMode: 420
+            name: prometheus-configmap
+          name: config-volume
+        - configMap:
+            defaultMode: 420
+            name: prometheus-alertrules
+          name: alertrules-volume
+        - name: prometheus-storage-volume
+          emptyDir: {}
+        - name: prometheus-key
+          secret:
+            secretName: prometheus-key
