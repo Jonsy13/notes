@@ -1,22 +1,22 @@
 # List of all docker images - 
 
 ```
-chaosnative/cle-auth-server:2.7.0
-chaosnative/cle-frontend:2.7.0
-chaosnative/cle-license-module:2.7.0
-chaosnative/cle-server:2.7.0
-chaosnative/curl:2.6.0
+chaosnative/hce-auth-server:2.8.0
+chaosnative/hce-frontend:2.8.0
+chaosnative/hce-license-module:2.8.0
+chaosnative/hce-server:2.8.0
+chaosnative/curl:2.8.0
 chaosnative/mongo:4.2.8
 chaosnative/argoexec:v3.2.3
-chaosnative/chaos-exporter:2.6.0
-chaosnative/chaos-operator:2.6.0
-chaonative/chaos-runner:2.6.0
-chaosnative/cle-event-tracker:2.7.0
-chaosnative/cle-subscriber:2.7.0
+chaosnative/chaos-exporter:2.8.0
+chaosnative/chaos-operator:2.8.0
+chaonative/chaos-runner:2.8.0
+chaosnative/hce-event-tracker:2.8.0
+chaosnative/hce-subscriber:2.8.0
 chaosnative/workflow-controller:v3.2.3
-chaosnative/go-runner:2.6.0
-chaosnative/k8s:2.6.0
-chaosnative/litmus-checker:2.6.0
+chaosnative/go-runner:2.8.0
+chaosnative/k8s:2.8.0
+chaosnative/litmus-checker:2.8.0
 ```
 
 
