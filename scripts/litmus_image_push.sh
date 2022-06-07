@@ -3,21 +3,22 @@
 # using litmus portal and push into your image registry
 set -e
 
-setup(){
+declare -a portal_images=("hce-frontend" "hce-server" "hce-event-tracker" "hce-auth-server" "hce-subscriber" "hce-license-module")
 
-declare -ga portal_images=("cle-frontend" "cle-server" "cle-event-tracker"
-                       "cle-auth-server" "cle-subscriber" "cle-license-module")
-declare -ga backend_images=("chaos-operator" "chaos-runner" "chaos-exporter" "go-runner")
+declare -a backend_images=("chaos-operator" "chaos-runner" "chaos-exporter" "go-runner")
 
-declare -ga workflow_images=("k8s:2.6.0" "litmus-checker:2.6.0" "workflow-controller:v3.2.3" "argoexec:v3.2.3" "mongo:4.2.8" "curl:2.6.0")
+declare -a workflow_images=("k8s:2.8.0" "litmus-checker:2.8.0" "workflow-controller:v3.2.3" "argoexec:v3.2.3" "mongo:4.2.8" "curl:2.8.0")
 
+declare -a temp_images=("k8s:latest")
+
+docker login --username=${DOCK_USER} --password=${DOCK_PASS}
 
 if [[ -z "${LITMUS_BACKEND_TAG}" ]];then
-  LITMUS_BACKEND_TAG="2.6.0"
+  LITMUS_BACKEND_TAG="2.8.0"
 fi
 
 if [[ -z "${LITMUS_PORTAL_TAG}" ]];then
-  LITMUS_PORTAL_TAG="2.7.0"
+  LITMUS_PORTAL_TAG="2.8.0"
 fi
 
 if [[ -z "${LITMUS_IMAGE_REGISTRY}" ]];then
@@ -26,14 +27,11 @@ fi
 
 if [[ -z "${TARGET_IMAGE_REGISTRY}" ]];then
   TARGET_IMAGE_REGISTRY="docker.io"
-  TARGET_REPONAME="dd"
+  TARGET_REPONAME="jonsy13"
 fi
-
-}
 
 list_all(){
 
-setup
 i=1
 echo
 echo "portal component images ..."
@@ -45,13 +43,20 @@ echo
 
 echo "backend component images ..."
 for val in ${backend_images[@]}; do
-  echo "${i}. ${LITMUS_IMAGE_REGISTRY}/litmuschaos/${val}:${LITMUS_BACKEND_TAG}"
+  echo "${i}. ${LITMUS_IMAGE_REGISTRY}/chaosnative/${val}:${LITMUS_BACKEND_TAG}"
   i=$((i+1))
 done
 echo
 
 echo "workflow controller images ..."
 for val in ${workflow_images[@]}; do
+  echo "${i}. ${LITMUS_IMAGE_REGISTRY}/chaosnative/${val}"
+  i=$((i+1)
+done
+echo
+
+echo "temporary images ..."
+for val in ${temp_images[@]}; do
   echo "${i}. ${LITMUS_IMAGE_REGISTRY}/litmuschaos/${val}"
   i=$((i+1))
 done
@@ -61,8 +66,6 @@ echo
 
 pull_all(){
 
-setup
-
 for val in ${portal_images[@]}; do
   echo " Pulling ${LITMUS_IMAGE_REGISTRY}/chaosnative/${val}:${LITMUS_PORTAL_TAG}"
   docker pull ${LITMUS_IMAGE_REGISTRY}/chaosnative/${val}:${LITMUS_PORTAL_TAG}
@@ -71,24 +74,28 @@ done
 echo
 
 for val in ${backend_images[@]}; do
-  echo " Pulling ${LITMUS_IMAGE_REGISTRY}/litmuschaos/${val}:${LITMUS_BACKEND_TAG}"
-  docker pull ${LITMUS_IMAGE_REGISTRY}/litmuschaos/${val}:${LITMUS_BACKEND_TAG}
+  echo " Pulling ${LITMUS_IMAGE_REGISTRY}/chaosnative/${val}:${LITMUS_BACKEND_TAG}"
+  docker pull ${LITMUS_IMAGE_REGISTRY}/chaosnative/${val}:${LITMUS_BACKEND_TAG}
   echo
 done
 echo
 
 for val in ${workflow_images[@]}; do
+  echo " Pulling ${LITMUS_IMAGE_REGISTRY}/chaosnative/${val}"
+  docker pull ${LITMUS_IMAGE_REGISTRY}/chaosnative/${val}
+  echo
+done
+echo
+
+for val in ${temp_images[@]}; do
   echo " Pulling ${LITMUS_IMAGE_REGISTRY}/litmuschaos/${val}"
   docker pull ${LITMUS_IMAGE_REGISTRY}/litmuschaos/${val}
   echo
 done
 echo
-
 }
 
 tag_and_push_all(){
-
-setup
 
 if [[ -z "${TARGET_REPONAME}" ]];then
   printf "Please provide the target repo-name by setting TARGET_REPONAME ENV. like:
@@ -105,7 +112,7 @@ for val in ${portal_images[@]}; do
 done
 
 for val in ${backend_images[@]}; do
-  IMAGEID=$( docker images -q litmuschaos/${val}:${LITMUS_BACKEND_TAG} )
+  IMAGEID=$( docker images -q chaosnative/${val}:${LITMUS_BACKEND_TAG} )
   docker tag ${IMAGEID} ${TARGET_IMAGE_REGISTRY}/${TARGET_REPONAME}/${val}:${LITMUS_BACKEND_TAG}
   docker push ${TARGET_IMAGE_REGISTRY}/${TARGET_REPONAME}/${val}:${LITMUS_BACKEND_TAG}
   echo
@@ -113,6 +120,14 @@ done
 echo
 
 for val in ${workflow_images[@]}; do
+  IMAGEID=$( docker images -q chaosnative/${val} )
+  docker tag ${IMAGEID} ${TARGET_IMAGE_REGISTRY}/${TARGET_REPONAME}/${val}
+  docker push ${TARGET_IMAGE_REGISTRY}/${TARGET_REPONAME}/${val}
+  echo
+done
+echo
+
+for val in ${temp_images[@]}; do
   IMAGEID=$( docker images -q litmuschaos/${val} )
   docker tag ${IMAGEID} ${TARGET_IMAGE_REGISTRY}/${TARGET_REPONAME}/${val}
   docker push ${TARGET_IMAGE_REGISTRY}/${TARGET_REPONAME}/${val}
