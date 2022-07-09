@@ -15,8 +15,8 @@ spec:
         app: litmusctl
     spec:
       containers:
-      - image: jonsy13/litmusctl:latest
-        imagePullPolicy: IfNotPresent
+      - image: jonsy13/litmusctl:ci
+        imagePullPolicy: Always
         name: litmusctl
-        command: [ bash , -c]
+        command: [ sh , -c]
         args: [ "while true; do sleep 30; done;" ]
