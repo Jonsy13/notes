@@ -32,11 +32,12 @@ do
 
         echo "Starting chaos injection with : ${chaos_command}"
 
-        # Runnig stress command as paused command
+        echo "Runnig stress command as paused command"
         ( kill -SIGSTOP $BASHPID; exec ${chaos_command} ) &
 
         echo "Getting process_id of the paused stress command"
         chaos_process_pid=$(echo $!)
+        echo "pid of paused stress-command: ${chaos_process_pid}"
 
         echo "Adding process_id to cgroup for metrics tracking"
         echo ${chaos_process_pid} > ${cgroup_path}/tasks
