@@ -26,7 +26,7 @@ do
         echo "[Info]: CONTAINER_ID: $CONTAINER_ID, PID: $PID"
         pidArr+=("$PID")
 
-        chaos_command="nsenter -t ${PID} -p stress-ng --vm 1 --vm-bytes 100M -t 100s"
+        chaos_command="nsenter -t ${PID} -p stress-ng --vm 1 --vm-bytes 100M -t 100s -v"
 
         cgroup_path="/sys/fs/cgroup/memory/ecs/${taskArray[index]}/${CONTAINER_ID}"
 
