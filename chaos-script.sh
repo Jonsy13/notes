@@ -12,11 +12,13 @@ if [ ! -d /var/lib/ecs/data/metadata ]; then
   exit 1
 fi
 
+chaosPidArr=()
+
 for index in "${!taskArray[@]}"
 do
   if [ -d /var/lib/ecs/data/metadata/${ClusterName}/${taskArray[index]} ]; then
-    for targetContainer in /var/lib/ecs/data/metadata/${ClusterName}/${taskArray[index]}/*/    
-    do  
+    for targetContainer in /var/lib/ecs/data/metadata/${ClusterName}/${taskArray[index]}/*/
+    do
         targetContainer=${targetContainer%*/}
         echo "[Info]: Targeting Container: ${targetContainer##*/}"
         echo "[Info]: Feching container id ..."
@@ -38,14 +40,17 @@ do
         echo "Getting process_id of the paused stress command"
         chaos_process_pid=$(echo $!)
         echo "pid of paused stress-command: ${chaos_process_pid}"
-
+        chaosPidArr+=("$chaos_process_pid")
+        
         echo "Adding process_id to cgroup for metrics tracking"
-        echo ${chaos_process_pid} > ${cgroup_path}/tasks
-
-        echo "sending SIGCONT signal to paused stress process for resuming the same"
-        kill -SIGCONT ${chaos_process_pid}
+        echo ${chaos_process_pid} >> ${cgroup_path}/tasks
     done
   fi
 done
-sleep 60s
+
+# starting all paused stress-chaos processes
+for pid in ${PIDS[*]}; do
+    kill -CONT $pid
+done
+
 echo "[Cleanup]: Finishing chaos injection"
