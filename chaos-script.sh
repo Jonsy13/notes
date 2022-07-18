@@ -33,7 +33,7 @@ do
         echo "Starting chaos injection with : ${chaos_command}"
 
         echo "Runnig stress command as paused command"
-        ( kill -SIGSTOP $BASHPID; exec ${chaos_command} ) &
+        ( kill -SIGSTOP $BASHPID; exec ${chaos_command} )
 
         echo "Getting process_id of the paused stress command"
         chaos_process_pid=$(echo $!)
