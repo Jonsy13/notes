@@ -35,13 +35,13 @@ do
         # Runnig stress command as paused command
         ( kill -SIGSTOP $BASHPID; exec ${chaos_command} ) &
 
-        # Getting process_id of the paused stress command
+        echo "Getting process_id of the paused stress command"
         chaos_process_pid=$(echo $!)
 
-        # Adding process_id to cgroup for metrics tracking
+        echo "Adding process_id to cgroup for metrics tracking"
         echo ${chaos_process_pid} > ${cgroup_path}/tasks
 
-        # sending SIGCONT signal to paused stress process for resuming the same
+        echo "sending SIGCONT signal to paused stress process for resuming the same"
         kill -SIGCONT ${chaos_process_pid}
     done
   fi
