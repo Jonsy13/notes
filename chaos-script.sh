@@ -26,14 +26,14 @@ do
         echo "[Info]: CONTAINER_ID: $CONTAINER_ID, PID: $PID"
         pidArr+=("$PID")
 
-        chaos_command="nsenter -t ${PID} -p stress-ng --vm 1 --vm-bytes 100M -t 100s -v"
+        chaos_command="nsenter -t ${PID} -p stress-ng --vm 1 --vm-bytes 100M -t 60s -v"
 
         cgroup_path="/sys/fs/cgroup/memory/ecs/${taskArray[index]}/${CONTAINER_ID}"
 
         echo "Starting chaos injection with : ${chaos_command}"
 
         echo "Runnig stress command as paused command"
-        ( kill -SIGSTOP $BASHPID; exec ${chaos_command} )
+        ( kill -SIGSTOP $BASHPID; exec ${chaos_command} ) &
 
         echo "Getting process_id of the paused stress command"
         chaos_process_pid=$(echo $!)
@@ -47,5 +47,5 @@ do
     done
   fi
 done
-
+sleep 60s
 echo "[Cleanup]: Finishing chaos injection"
